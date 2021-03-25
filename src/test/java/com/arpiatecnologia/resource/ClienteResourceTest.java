@@ -1,5 +1,6 @@
 package com.arpiatecnologia.resource;
 
+import com.arpiatecnologia.model.Cliente;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,9 @@ class ClienteResourceTest {
     @Test
     @DisplayName("Deve criar um cliente com sucesso.")
     void create_Sucesso() throws Exception {
-        String json = this.mapper.writeValueAsString(null);
+        Cliente cliente = Cliente.builder().nome("Luis Gustavo").build();
+
+        String json = this.mapper.writeValueAsString(cliente);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CLIENTE_API)
                                                                       .contentType(MediaType.APPLICATION_JSON)
@@ -44,6 +47,6 @@ class ClienteResourceTest {
         this.mockMvc.perform(request)
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("id").isNotEmpty())
-                    .andExpect(jsonPath("nome").value("Luis Gustavo"));
+                    .andExpect(jsonPath("nome").value(cliente.getNome()));
     }
 }
