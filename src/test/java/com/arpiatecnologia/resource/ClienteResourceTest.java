@@ -51,11 +51,11 @@ class ClienteResourceTest {
     @DisplayName("Deve criar um cliente com sucesso.")
     void create_Sucesso() throws Exception {
         Cliente cliente = this.fakeNewCliente();
-        Cliente savedCliente = this.fakeSavedCliente();
+        Cliente clienteSaved = this.fakeSavedCliente();
 
         String json = this.mapper.writeValueAsString(cliente);
 
-        given(this.service.save(any(Cliente.class))).willReturn(savedCliente);
+        given(this.service.save(any(Cliente.class))).willReturn(clienteSaved);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CLIENTE_API)
                                                                       .contentType(MediaType.APPLICATION_JSON)
