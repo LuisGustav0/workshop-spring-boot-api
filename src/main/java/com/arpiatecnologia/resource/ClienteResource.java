@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
@@ -28,7 +29,7 @@ public class ClienteResource {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Cliente> create(@RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> create(@RequestBody @Valid Cliente cliente) {
         Cliente clienteSaved = this.service.save(cliente);
         URI uriLocation = this.getLocation(clienteSaved.getId());
 
