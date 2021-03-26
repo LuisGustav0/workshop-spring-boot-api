@@ -1,5 +1,6 @@
 package com.arpiatecnologia.resource;
 
+import com.arpiatecnologia.exception.BusinessException;
 import com.arpiatecnologia.model.Cliente;
 import com.arpiatecnologia.service.ClienteService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,14 +81,31 @@ class ClienteResourceTest {
     @Test
     @DisplayName("Deve lançar erro de validação quando não enviar nome do cliente")
     void create_Cliente_NomeVazio() throws Exception {
-        Cliente cliente = this.fakeNewCliente();
+        Cliente fakeCliente = this.fakeNewCliente();
 
-        String json = this.mapper.writeValueAsString(cliente);
+        String json = this.mapper.writeValueAsString(fakeCliente);
+
+        MockHttpServletRequestBuilder request = this.mockPost(json);
+
+        this.mockMvc.perform(request).andExpect(status().isBadRequest()).andExpect(jsonPath("errors", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("Deve lançar erro ao tentar criar um cliente com nome que já possui")
+    void create_ClienteComNomeDuplicado() throws Exception {
+
+        Cliente fakeCliente = this.fakeNewCliente("Luis Gustavo");
+        String json = this.mapper.writeValueAsString(fakeCliente);
+
+        String message = "Nome já cadastrado";
+
+        given(this.service.save(any(Cliente.class))).willThrow(new BusinessException(message));
 
         MockHttpServletRequestBuilder request = this.mockPost(json);
 
         this.mockMvc.perform(request)
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("errors", hasSize(1)));
+                    .andExpect(jsonPath("errors", hasSize(1)))
+                    .andExpect(jsonPath("errors[0].message").value(message));
     }
 }
