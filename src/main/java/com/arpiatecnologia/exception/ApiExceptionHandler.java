@@ -41,4 +41,10 @@ public class ApiExceptionHandler {
 
         return ApiErrorResponse.of(allErros);
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BusinessException.class)
+    public ApiErrorResponse handleBusinessException(BusinessException ex) {
+        return ApiErrorResponse.of(new ApiError(ex.getMessage(), ""));
+    }
 }
