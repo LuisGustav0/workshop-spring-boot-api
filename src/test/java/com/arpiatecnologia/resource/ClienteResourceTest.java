@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,32 +40,54 @@ class ClienteResourceTest {
     @MockBean
     private ClienteService service;
 
-    private Cliente fakeSavedCliente() {
-        return Cliente.builder().id(1L).nome("Luis Gustavo").build();
+    private Cliente fakeSavedCliente(Long id, String nome) {
+        return Cliente.builder().id(id).nome(nome).build();
+    }
+
+    private Cliente fakeNewCliente(String nome) {
+        return this.fakeSavedCliente(null, nome);
     }
 
     private Cliente fakeNewCliente() {
-        return Cliente.builder().nome("Luis Gustavo").build();
+        return this.fakeNewCliente(null);
+    }
+
+    private MockHttpServletRequestBuilder mockPost(String json) {
+        return MockMvcRequestBuilders.post(CLIENTE_API)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .content(json);
     }
 
     @Test
     @DisplayName("Deve criar um cliente com sucesso.")
     void create_Sucesso() throws Exception {
-        Cliente cliente = this.fakeNewCliente();
-        Cliente clienteSaved = this.fakeSavedCliente();
+        Cliente fakeCliente = this.fakeNewCliente("Luis Gustavo");
+        Cliente fakeClienteSaved = this.fakeSavedCliente(13L, "Luis Gustavo");
 
-        String json = this.mapper.writeValueAsString(cliente);
+        String json = this.mapper.writeValueAsString(fakeCliente);
 
-        given(this.service.save(any(Cliente.class))).willReturn(clienteSaved);
+        given(this.service.save(any(Cliente.class))).willReturn(fakeClienteSaved);
 
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(CLIENTE_API)
-                                                                      .contentType(MediaType.APPLICATION_JSON)
-                                                                      .accept(MediaType.APPLICATION_JSON)
-                                                                      .content(json);
+        MockHttpServletRequestBuilder request = this.mockPost(json);
 
         this.mockMvc.perform(request)
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("id").isNotEmpty())
-                    .andExpect(jsonPath("nome").value(cliente.getNome()));
+                    .andExpect(jsonPath("nome").value(fakeCliente.getNome()));
+    }
+
+    @Test
+    @DisplayName("Deve lançar erro de validação quando não enviar nome do cliente")
+    void create_Nome_Empty() throws Exception {
+        Cliente cliente = this.fakeNewCliente();
+
+        String json = this.mapper.writeValueAsString(cliente);
+
+        MockHttpServletRequestBuilder request = this.mockPost(json);
+
+        this.mockMvc.perform(request)
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("errors", hasSize(1)));
     }
 }
