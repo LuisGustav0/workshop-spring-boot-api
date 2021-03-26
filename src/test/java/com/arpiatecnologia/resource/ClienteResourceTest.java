@@ -18,9 +18,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Optional;
+
 import static com.arpiatecnologia.consts.ClienteErrorConst.CLIENTE_NOME_JA_CADASTRADO;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,6 +62,12 @@ class ClienteResourceTest {
                                      .contentType(MediaType.APPLICATION_JSON)
                                      .accept(MediaType.APPLICATION_JSON)
                                      .content(json);
+    }
+
+    private MockHttpServletRequestBuilder mockGetById(Long id) {
+        String url = CLIENTE_API.concat("/" + id);
+
+        return MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_JSON);
     }
 
     @Test
@@ -105,5 +114,34 @@ class ClienteResourceTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("errors", hasSize(1)))
                     .andExpect(jsonPath("errors[0].message").value(CLIENTE_NOME_JA_CADASTRADO));
+    }
+
+    @Test
+    @DisplayName("Deve obter informações de um cliente")
+    void read_ClienteById() throws Exception {
+        Long id = 1L;
+
+        Cliente cliente = this.fakeSavedCliente(id, "Luis Gustavo");
+
+        given(this.service.readById(anyLong())).willReturn(Optional.of(cliente));
+
+        MockHttpServletRequestBuilder request = this.mockGetById(id);
+
+        this.mockMvc.perform(request)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("id").value(id))
+                    .andExpect(jsonPath("nome").value(cliente.getNome()));
+    }
+
+    @Test
+    @DisplayName("Deve retornar not found quando o cliente procurado não existir")
+    void read_ClienteById_NotFound() throws Exception {
+        Long id = 1L;
+
+        given(this.service.readById(anyLong())).willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = this.mockGetById(id);
+
+        this.mockMvc.perform(request).andExpect(status().isNotFound());
     }
 }
