@@ -4,7 +4,7 @@ import com.arpiatecnologia.exception.model.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -22,10 +22,9 @@ public class ApiExceptionHandler {
     private List<ApiError> toApiErrors(BindingResult bindingResult) {
         final List<ApiError> apiErrors = new ArrayList<>();
 
-        for (ObjectError objectError : bindingResult.getAllErrors()) {
-            final String message = objectError.getDefaultMessage();
-            final String msgDev = "Na Classe " + objectError.getObjectName() +
-                    "error: "+ objectError.getDefaultMessage();
+        for (FieldError fieldError : bindingResult.getFieldErrors()) {
+            final String message = fieldError.getField() + " " + fieldError.getDefaultMessage();
+            final String msgDev = "Na Classe " + fieldError.getObjectName() + message;
 
             apiErrors.add(new ApiError(message, msgDev));
         }
