@@ -22,7 +22,6 @@ class ClienteServiceTest {
     @Mock
     private ClienteRepository repository;
 
-    @Mock
     private ClienteService service;
 
     @BeforeEach
