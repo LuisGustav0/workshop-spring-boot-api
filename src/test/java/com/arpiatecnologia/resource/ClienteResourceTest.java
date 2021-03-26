@@ -61,7 +61,7 @@ class ClienteResourceTest {
 
     @Test
     @DisplayName("Deve criar um cliente com sucesso.")
-    void create_Sucesso() throws Exception {
+    void create_ClienteComSucesso() throws Exception {
         Cliente fakeCliente = this.fakeNewCliente("Luis Gustavo");
         Cliente fakeClienteSaved = this.fakeSavedCliente(13L, "Luis Gustavo");
 
@@ -79,7 +79,7 @@ class ClienteResourceTest {
 
     @Test
     @DisplayName("Deve lançar erro de validação quando não enviar nome do cliente")
-    void create_Nome_Empty() throws Exception {
+    void create_Cliente_NomeVazio() throws Exception {
         Cliente cliente = this.fakeNewCliente();
 
         String json = this.mapper.writeValueAsString(cliente);
