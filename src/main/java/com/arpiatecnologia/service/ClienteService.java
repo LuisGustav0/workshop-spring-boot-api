@@ -9,4 +9,6 @@ public interface ClienteService {
     Cliente save(Cliente cliente);
 
     Optional<Cliente> readById(Long id);
+
+    void deleteById(Long id);
 }

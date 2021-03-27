@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static com.arpiatecnologia.consts.ClienteErrorConst.BE_CLIENTE_NOT_FOUND;
 import static com.arpiatecnologia.consts.ClienteErrorConst.CLIENTE_NOME_JA_CADASTRADO;
 
 @Service
@@ -27,6 +28,13 @@ public class ClienteServiceImpl implements ClienteService {
             throw new BusinessException(CLIENTE_NOME_JA_CADASTRADO);
 
         return this.repository.save(cliente);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        Cliente cliente = this.readById(id).orElseThrow(BE_CLIENTE_NOT_FOUND);
+
+        this.repository.delete(cliente);
     }
 
     @Override
