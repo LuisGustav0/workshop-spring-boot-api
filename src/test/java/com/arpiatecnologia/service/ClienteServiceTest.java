@@ -9,13 +9,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 import static com.arpiatecnologia.consts.ClienteErrorConst.CLIENTE_NOME_JA_CADASTRADO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -59,12 +67,36 @@ class ClienteServiceTest {
     void save_ClienteComNomeDuplicado() {
         Cliente fakeCliente = this.fakeNewCliente();
 
-        when(this.repository.save(any(Cliente.class))).thenThrow(new BusinessException(CLIENTE_NOME_JA_CADASTRADO));
+        when(this.repository.existsByNome(anyString())).thenReturn(true);
 
         Throwable throwable = catchThrowable(() -> this.service.save(fakeCliente));
 
-        assertThat(throwable)
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(CLIENTE_NOME_JA_CADASTRADO);
+        assertThat(throwable).isInstanceOf(BusinessException.class).hasMessage(CLIENTE_NOME_JA_CADASTRADO);
+    }
+
+    @Test
+    @DisplayName("Deve deletar um cliente com sucesso")
+    void delete_ClienteById() {
+        Long id = 1L;
+
+        Cliente cliente = this.fakeSavedCliente();
+
+        when(this.repository.findById(id)).thenReturn(Optional.of(cliente));
+
+        this.service.deleteById(id);
+
+        verify(this.repository, times(1)).delete(cliente);
+    }
+
+    @Test
+    @DisplayName("Deve retornar not found quando deletar não encontrar o cliente para deletar")
+    void delete_ClienteById_NotFound() {
+        Long id = 1L;
+
+        when(this.repository.findById(id)).thenReturn(Optional.empty());
+
+        Throwable throwable = catchThrowable(() -> this.service.deleteById(id));
+
+        assertThat(throwable).isInstanceOf(ResponseStatusException.class).hasMessage(HttpStatus.BAD_REQUEST.toString());
     }
 }

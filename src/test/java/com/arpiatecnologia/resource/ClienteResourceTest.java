@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -25,6 +27,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,6 +48,8 @@ class ClienteResourceTest {
     @MockBean
     private ClienteService service;
 
+    private static final ResponseStatusException HTTP_BAD_REQUEST = new ResponseStatusException(HttpStatus.BAD_REQUEST);
+
     private Cliente fakeSavedCliente(Long id, String nome) {
         return Cliente.builder().id(id).nome(nome).build();
     }
@@ -64,10 +69,25 @@ class ClienteResourceTest {
                                      .content(json);
     }
 
+    private MockHttpServletRequestBuilder mockPut(Long id, String json) {
+        String url = CLIENTE_API.concat("/" + id);
+
+        return MockMvcRequestBuilders.put(url)
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .content(json);
+    }
+
     private MockHttpServletRequestBuilder mockGetById(Long id) {
         String url = CLIENTE_API.concat("/" + id);
 
         return MockMvcRequestBuilders.get(url).accept(MediaType.APPLICATION_JSON);
+    }
+
+    private MockHttpServletRequestBuilder mockDeleteById(Long id) {
+        String url = CLIENTE_API.concat("/" + id);
+
+        return MockMvcRequestBuilders.delete(url).accept(MediaType.APPLICATION_JSON);
     }
 
     @Test
@@ -143,5 +163,31 @@ class ClienteResourceTest {
         MockHttpServletRequestBuilder request = this.mockGetById(id);
 
         this.mockMvc.perform(request).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Deve deletar um cliente com sucesso")
+    void delete_ClienteById() throws Exception {
+        Long id = 1L;
+
+        Cliente cliente = this.fakeSavedCliente(id, "Luis Gustavo");
+
+        given(this.service.readById(anyLong())).willReturn(Optional.of(cliente));
+
+        MockHttpServletRequestBuilder request = this.mockDeleteById(id);
+
+        this.mockMvc.perform(request).andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Deve retornar not found quando deletar não encontrar o cliente para deletar")
+    void delete_ClienteById_NotFound() throws Exception {
+        Long id = 1L;
+
+        willThrow(HTTP_BAD_REQUEST).given(this.service).deleteById(anyLong());
+
+        MockHttpServletRequestBuilder request = this.mockDeleteById(id);
+
+        this.mockMvc.perform(request).andExpect(status().isBadRequest());
     }
 }
