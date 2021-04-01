@@ -5,8 +5,10 @@ import com.arpiatecnologia.model.Cliente;
 import com.arpiatecnologia.repository.ClienteRepository;
 import com.arpiatecnologia.service.ClienteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.arpiatecnologia.consts.ClienteErrorConst.BE_CLIENTE_NOT_FOUND;
@@ -31,6 +33,22 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
+    public Cliente update(Long id, Cliente cliente) {
+        Cliente clienteSaved = this.readById(id).orElseThrow(BE_CLIENTE_NOT_FOUND);
+
+        BeanUtils.copyProperties(cliente, clienteSaved, "id");
+
+        clienteSaved = this.repository.save(clienteSaved);
+
+        return clienteSaved;
+    }
+
+    @Override
+    public Optional<Cliente> readById(Long id) {
+        return this.repository.findById(id);
+    }
+
+    @Override
     public void deleteById(Long id) {
         Cliente cliente = this.readById(id).orElseThrow(BE_CLIENTE_NOT_FOUND);
 
@@ -38,7 +56,7 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public Optional<Cliente> readById(Long id) {
-        return this.repository.findById(id);
+    public List<Cliente> readAll() {
+        return this.repository.findAll();
     }
 }

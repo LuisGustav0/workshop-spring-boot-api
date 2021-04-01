@@ -24,7 +24,7 @@ public class ApiExceptionHandler {
 
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
             final String message = fieldError.getField() + " " + fieldError.getDefaultMessage();
-            final String msgDev = "Na Classe " + fieldError.getObjectName() + message;
+            final String msgDev = "Na Classe " + fieldError.getObjectName() + " " + message;
 
             apiErrors.add(new ApiError(message, msgDev));
         }
@@ -44,6 +44,12 @@ public class ApiExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BusinessException.class)
     public ApiErrorResponse handleBusinessException(BusinessException ex) {
+        return ApiErrorResponse.of(new ApiError(ex.getMessage(), ""));
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ApiErrorResponse handleBusinessException(EntityNotFoundException ex) {
         return ApiErrorResponse.of(new ApiError(ex.getMessage(), ""));
     }
 }
