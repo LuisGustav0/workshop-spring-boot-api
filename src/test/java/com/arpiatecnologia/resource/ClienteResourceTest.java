@@ -48,7 +48,7 @@ class ClienteResourceTest {
     @MockBean
     private ClienteService service;
 
-    private static final ResponseStatusException HTTP_BAD_REQUEST = new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    private static final ResponseStatusException HTTP_NOT_FOUND = new ResponseStatusException(HttpStatus.NOT_FOUND);
 
     private Cliente fakeSavedCliente(Long id, String nome) {
         return Cliente.builder().id(id).nome(nome).build();
@@ -166,13 +166,44 @@ class ClienteResourceTest {
     }
 
     @Test
+    @DisplayName("Deve atualizar um cliente")
+    void update_ClienteComSucesso() throws Exception {
+        Long id = 1L;
+
+        Cliente fakeCliente = this.fakeSavedCliente(id, "Luis Gustavo");
+
+        String json = this.mapper.writeValueAsString(fakeCliente);
+
+        given(this.service.update(anyLong(), any(Cliente.class))).willReturn(fakeCliente);
+
+        MockHttpServletRequestBuilder request = this.mockPut(id, json);
+
+        this.mockMvc.perform(request)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("id").value(id))
+                    .andExpect(jsonPath("nome").value(fakeCliente.getNome()));
+    }
+
+    @Test
+    @DisplayName("Deve retornar not found quando não encontrar o cliente pra atualizar")
+    void update_ClienteById_NotFound() throws Exception {
+        Long id = 1L;
+
+        Cliente fakeCliente = this.fakeSavedCliente(id, "Luis Gustavo");
+
+        String json = this.mapper.writeValueAsString(fakeCliente);
+
+        willThrow(HTTP_NOT_FOUND).given(this.service).update(anyLong(), any(Cliente.class));
+
+        MockHttpServletRequestBuilder request = this.mockPut(id, json);
+
+        this.mockMvc.perform(request).andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("Deve deletar um cliente com sucesso")
     void delete_ClienteById() throws Exception {
         Long id = 1L;
-
-        Cliente cliente = this.fakeSavedCliente(id, "Luis Gustavo");
-
-        given(this.service.readById(anyLong())).willReturn(Optional.of(cliente));
 
         MockHttpServletRequestBuilder request = this.mockDeleteById(id);
 
@@ -184,10 +215,10 @@ class ClienteResourceTest {
     void delete_ClienteById_NotFound() throws Exception {
         Long id = 1L;
 
-        willThrow(HTTP_BAD_REQUEST).given(this.service).deleteById(anyLong());
+        willThrow(HTTP_NOT_FOUND).given(this.service).deleteById(anyLong());
 
         MockHttpServletRequestBuilder request = this.mockDeleteById(id);
 
-        this.mockMvc.perform(request).andExpect(status().isBadRequest());
+        this.mockMvc.perform(request).andExpect(status().isNotFound());
     }
 }

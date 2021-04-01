@@ -1,6 +1,7 @@
 package com.arpiatecnologia.service;
 
 import com.arpiatecnologia.exception.BusinessException;
+import com.arpiatecnologia.exception.ClienteNotFoundException;
 import com.arpiatecnologia.model.Cliente;
 import com.arpiatecnologia.repository.ClienteRepository;
 import com.arpiatecnologia.service.impl.ClienteServiceImpl;
@@ -9,15 +10,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
 import static com.arpiatecnologia.consts.ClienteErrorConst.CLIENTE_NOME_JA_CADASTRADO;
+import static com.arpiatecnologia.consts.ClienteErrorConst.CLIENTE_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -89,7 +88,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("Deve retornar not found quando deletar não encontrar o cliente para deletar")
+    @DisplayName("Deve retornar um erro ao tentar deletar cliente não encontrado")
     void delete_ClienteById_NotFound() {
         Long id = 1L;
 
@@ -97,6 +96,6 @@ class ClienteServiceTest {
 
         Throwable throwable = catchThrowable(() -> this.service.deleteById(id));
 
-        assertThat(throwable).isInstanceOf(ResponseStatusException.class).hasMessage(HttpStatus.BAD_REQUEST.toString());
+        assertThat(throwable).isInstanceOf(ClienteNotFoundException.class).hasMessage(CLIENTE_NOT_FOUND);
     }
 }
