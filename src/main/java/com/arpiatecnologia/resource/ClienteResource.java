@@ -1,5 +1,6 @@
 package com.arpiatecnologia.resource;
 
+import com.arpiatecnologia.filter.ClienteFilter;
 import com.arpiatecnologia.model.Cliente;
 import com.arpiatecnologia.service.ClienteService;
 import lombok.NonNull;
@@ -61,7 +62,7 @@ public class ClienteResource {
     }
 
     @GetMapping
-    public List<Cliente> readAll() {
-        return this.service.readAll();
+    public List<Cliente> readAll(ClienteFilter filter) {
+       return this.service.readAll(filter);
     }
 }

@@ -1,5 +1,6 @@
 package com.arpiatecnologia.service;
 
+import com.arpiatecnologia.filter.ClienteFilter;
 import com.arpiatecnologia.model.Cliente;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface ClienteService {
 
     Cliente update(Long id, Cliente cliente);
 
-    List<Cliente> readAll();
+    List<Cliente> readAll(ClienteFilter filter);
 }

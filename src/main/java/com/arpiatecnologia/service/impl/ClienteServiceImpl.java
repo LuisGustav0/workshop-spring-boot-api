@@ -1,6 +1,7 @@
 package com.arpiatecnologia.service.impl;
 
 import com.arpiatecnologia.exception.BusinessException;
+import com.arpiatecnologia.filter.ClienteFilter;
 import com.arpiatecnologia.model.Cliente;
 import com.arpiatecnologia.repository.ClienteRepository;
 import com.arpiatecnologia.service.ClienteService;
@@ -56,7 +57,7 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public List<Cliente> readAll() {
-        return this.repository.findAll();
+    public List<Cliente> readAll(ClienteFilter filter) {
+        return this.repository.readAll(filter);
     }
 }
