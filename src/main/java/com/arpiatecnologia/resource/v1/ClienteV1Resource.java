@@ -1,4 +1,4 @@
-package com.arpiatecnologia.resource;
+package com.arpiatecnologia.resource.v1;
 
 import com.arpiatecnologia.filter.ClienteFilter;
 import com.arpiatecnologia.model.Cliente;
@@ -26,7 +26,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/cliente")
-public class ClienteResource {
+public class ClienteV1Resource {
 
     private final ClienteService service;
 

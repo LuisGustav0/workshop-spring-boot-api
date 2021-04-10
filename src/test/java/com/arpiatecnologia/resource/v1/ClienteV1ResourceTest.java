@@ -1,4 +1,4 @@
-package com.arpiatecnologia.resource;
+package com.arpiatecnologia.resource.v1;
 
 import com.arpiatecnologia.exception.BusinessException;
 import com.arpiatecnologia.model.Cliente;
@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @WebMvcTest
 @AutoConfigureMockMvc
-class ClienteResourceTest {
+class ClienteV1ResourceTest {
 
     static String CLIENTE_API = "/cliente";
 
